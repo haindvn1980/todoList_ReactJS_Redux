@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux'
+import * as actions from './../actions/index'
+
 class TaskForm extends Component {
   constructor(props) {
     super(props);
@@ -10,15 +13,7 @@ class TaskForm extends Component {
 
   }
 
-  // componentWillMount() {
-  //   if (this.props.itemEditing && this.props.itemEditing.id !== null) {
-  //     this.setState({
-  //       id: this.props.itemEditing.id,
-  //       name: this.props.itemEditing.name,
-  //       status: this.props.itemEditing.status
-  //     });
-  //   }
-  // }
+
 
   onCloseForm = () => {
     this.props.onCloseForm();
@@ -33,9 +28,9 @@ class TaskForm extends Component {
     })
   }
 
-  onSubmit = (event) => {
+  onHandleSubmit = (event) => {
     event.preventDefault();
-    this.props.onSubmit(this.state);
+    this.props.onAddTask(this.state);
     this.onClear();
     this.onCloseForm();
   }
@@ -52,7 +47,6 @@ class TaskForm extends Component {
     if (this.props.itemEditing) {
       id = this.props.itemEditing.id;
     }
-    //console.log(this.props.itemEditing);
     return (
       <div className="panel panel-warning">
         <div className="panel-heading">
@@ -62,7 +56,7 @@ class TaskForm extends Component {
           </h3>
         </div>
         <div className="panel-body">
-          <form onSubmit={this.onSubmit} >
+          <form onSubmit={this.onHandleSubmit} >
             <div className="form-group">
               <label>Tên :</label>
               <input type="text" name='name'
@@ -90,4 +84,17 @@ class TaskForm extends Component {
     );
   }
 }
-export default TaskForm;
+
+const mapStateToProps = () => {
+  return {
+
+  }
+}
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    onAddTask: (task) => {
+      dispatch(actions.addTask(task))
+    }
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(TaskForm);
