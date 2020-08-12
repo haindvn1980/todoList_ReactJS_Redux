@@ -23,23 +23,19 @@ class TaskList extends Component {
     this.setState({
       [name]: value
     });
-
   }
 
   render() {
 
     let { tasks } = this.props;
     let { filterName, filterStatus } = this.state;
-
     let elmTasks = tasks.map((task, index) => {
       return (
         <TaskItem
           key={task.id}
           task={task}
           index={index + 1}
-          onUpdateStatus={this.props.onUpdateStatus}
-          onDelete={this.props.onDelete}
-          onUpdate={this.props.onUpdate}
+          // onUpdate={this.props.onUpdate}
         />
       )
     });
@@ -80,12 +76,10 @@ class TaskList extends Component {
                 <td></td>
               </tr>
               {elmTasks}
-
             </tbody>
           </table>
         </div>
       </div>
-
     );
   }
 }

@@ -10,10 +10,7 @@ class TaskForm extends Component {
       name: '',
       status: true
     };
-
   }
-
-
 
   onCloseForm = () => {
     this.props.onCloseForm();
@@ -28,25 +25,35 @@ class TaskForm extends Component {
     })
   }
 
-  onHandleSubmit = (event) => {
+  onSave = (event) => {
     event.preventDefault();
-    this.props.onAddTask(this.state);
+    //console.log(this.props.itemEditing)
+    // if (this.props.itemEditing) {
+    //   this.setState({
+    //     id: this.props.itemEditing.id
+    //   })
+    // }
+    console.log(this.state);
+    this.props.onSaveTask(this.state);
     this.onClear();
     this.onCloseForm();
   }
 
   onClear = () => {
     this.setState({
+      id: "",
       name: "",
-      status: false
+      status: false,
     })
   }
 
   render() {
     let id = '';
-    if (this.props.itemEditing) {
+    //console.log(this.props.itemEditing);
+    if (this.props.itemEditing && this.props.itemEditing.id !== null) {
       id = this.props.itemEditing.id;
     }
+    if (!this.props.isDisplayForm) return null;
     return (
       <div className="panel panel-warning">
         <div className="panel-heading">
@@ -56,19 +63,17 @@ class TaskForm extends Component {
           </h3>
         </div>
         <div className="panel-body">
-          <form onSubmit={this.onHandleSubmit} >
+          <form onSubmit={this.onSave} >
             <div className="form-group">
               <label>Tên :</label>
               <input type="text" name='name'
-                defaultValue={id !== '' ? this.props.itemEditing.name : this.state.name}
+                defaultValue={id !== '' ? this.props.itemEditing.name : ''}
                 onChange={this.onChange}
                 className="form-control" />
             </div>
             <label>Trạng Thái :</label>
             <select className="form-control" required="required"
-              name="status"
-              onChange={this.onChange}
-              defaultValue={id !== '' ? this.props.itemEditing.status : this.state.status}
+              name="status" defaultValue={id !== '' ? this.props.itemEditing.status : true}
             >
               <option value={true}>Kích Hoạt</option>
               <option value={false}>Ẩn</option>
@@ -85,15 +90,19 @@ class TaskForm extends Component {
   }
 }
 
-const mapStateToProps = () => {
+const mapStateToProps = (state) => {
   return {
-
+    isDisplayForm: state.isDisplayForm,
+    itemEditing: state.itemEditing
   }
 }
 const mapDispatchToProps = (dispatch, props) => {
   return {
-    onAddTask: (task) => {
-      dispatch(actions.addTask(task))
+    onSaveTask: (task) => {
+      dispatch(actions.saveTask(task))
+    },
+    onCloseForm: () => {
+      dispatch(actions.closeForm())
     }
   }
 }
