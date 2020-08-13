@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import TaskItem from './TaskItem.js';
 import { connect } from 'react-redux';
+import * as actions from './../actions/index.js';
 
 class TaskList extends Component {
 
@@ -8,18 +9,18 @@ class TaskList extends Component {
     super(props);
     this.state = {
       filterName: '',
-      filterStatus: '', //all -1, an:0, kich hoat :1
+      filterStatus: -1, //all -1, an:0, kich hoat :1
     }
   }
   onChange = (event) => {
     let target = event.target;
     let name = target.name;
-    let value = target.value;
-    this.props.onFilter(
-      name === 'filterName' ? value : this.state.filterName,
-      name === 'filterStatus' ? value : this.state.filterStatus
-    )
-    this.setState({ keywork: event.target.value });
+    let value = target.type === 'checkbox' ? target.checked : target.value;
+    var filter = {
+      name: name === 'filterName' ? value : this.state.filterName,
+      status: name === 'filterStatus' ? value : this.state.filterStatus
+    };
+    this.props.onFilterTable(filter);
     this.setState({
       [name]: value
     });
@@ -27,21 +28,56 @@ class TaskList extends Component {
 
   render() {
 
-    let { tasks } = this.props;
-    let { filterName, filterStatus } = this.state;
+    let { tasks, filterTable, keyword, sort } = this.props;
+    //tìm kiếm tại list
+    if (filterTable) {
+      if (filterTable.name) {
+        tasks = tasks.filter((task) => {
+          return task.name.toLowerCase().indexOf(filterTable.name) !== -1
+        })
+      }
+      tasks = tasks.filter((task) => {
+        if (filterTable.status === -1) {
+          return task;
+        } else {
+          return task.status === (filterTable.status === 1 ? true : false)
+        }
+      })
+    }
+
+    if (keyword) {
+      tasks = tasks.filter((task) => {
+        return task.name.toLowerCase().indexOf(keyword) !== -1
+      })
+    }
+
+    if (sort.by === 'name') {
+      tasks = tasks.sort((a, b) => {
+        if (a.name > b.name) return parseInt(sort.value);
+        else if (a.name < b.name) return -parseInt(sort.value);
+        else return 0;
+      });
+    }
+
+    if (sort.by === 'status') {
+      tasks = tasks.sort((a, b) => {
+        if (a.status > b.status) return parseInt(sort.value);
+        else return -parseInt(sort.value);
+      });
+    }
+
     let elmTasks = tasks.map((task, index) => {
       return (
         <TaskItem
           key={task.id}
           task={task}
           index={index + 1}
-          // onUpdate={this.props.onUpdate}
         />
       )
     });
 
     return (
-      <div className="row mt-15">
+      <div className="row mt-15" >
         <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
           <table className="table table-bordered table-hover mt-15">
             <thead>
@@ -56,21 +92,24 @@ class TaskList extends Component {
               <tr>
                 <td></td>
                 <td>
-                  <input type="text"
+                  <input
+                    type="text"
+                    className="form-control"
                     name="filterName"
-                    defaultValue={filterName}
                     onChange={this.onChange}
-                    className="form-control" />
+                    value={this.state.filerName}
+                  />
                 </td>
                 <td>
-                  <select className="form-control"
+                  <select
+                    className="form-control"
                     name="filterStatus"
-                    defaultValue={filterStatus}
                     onChange={this.onChange}
+                    value={this.state.filterStatus}
                   >
-                    <option value="-1">Tất Cả</option>
-                    <option value="0">Ẩn</option>
-                    <option value="1">Kích Hoạt</option>
+                    <option value={-1}>Tất Cả</option>
+                    <option value={0}>Ẩn</option>
+                    <option value={1}>Kích Hoạt</option>
                   </select>
                 </td>
                 <td></td>
@@ -86,8 +125,18 @@ class TaskList extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    tasks: state.tasks
+    tasks: state.tasks,
+    filterTable: state.filterTable,
+    keyword: state.search,
+    sort: state.sort
   }
 };
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    onFilterTable: (filter) => {
+      dispatch(actions.filterTask(filter))
+    },
+  }
+}
 
-export default connect(mapStateToProps, null)(TaskList);
+export default connect(mapStateToProps, mapDispatchToProps)(TaskList);

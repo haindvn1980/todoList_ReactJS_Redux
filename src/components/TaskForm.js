@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux'
-import * as actions from './../actions/index'
+import { connect } from 'react-redux';
+import * as actions from './../actions/index';
 
 class TaskForm extends Component {
   constructor(props) {
@@ -8,18 +8,45 @@ class TaskForm extends Component {
     this.state = {
       id: '',
       name: '',
-      status: true
+      status: false
     };
+  }
+  componentWillMount() {
+    if (this.props.itemEditing && this.props.itemEditing.id !== null) {
+      this.setState({
+        id: this.props.itemEditing.id,
+        name: this.props.itemEditing.name,
+        status: this.props.itemEditing.status
+      });
+    } else {
+      this.onClear();
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps && nextProps.itemEditing) {
+      this.setState({
+        id: nextProps.itemEditing.id,
+        name: nextProps.itemEditing.name,
+        status: nextProps.itemEditing.status
+      });
+    } else {
+      this.onClear();
+    }
   }
 
   onCloseForm = () => {
     this.props.onCloseForm();
   }
 
-  onChange = (event) => {
-    let target = event.target;
-    let name = target.name;
-    let value = target.value;
+  onHandleChange = (event) => {
+    var target = event.target;
+    var name = target.name;
+    var value = target.value;
+    //ép kiểu boolean
+    if (name === 'status') {
+      value = target.value === 'true' ? true : false;
+    }
     this.setState({
       [name]: value
     })
@@ -27,13 +54,6 @@ class TaskForm extends Component {
 
   onSave = (event) => {
     event.preventDefault();
-    //console.log(this.props.itemEditing)
-    // if (this.props.itemEditing) {
-    //   this.setState({
-    //     id: this.props.itemEditing.id
-    //   })
-    // }
-    console.log(this.state);
     this.props.onSaveTask(this.state);
     this.onClear();
     this.onCloseForm();
@@ -41,24 +61,18 @@ class TaskForm extends Component {
 
   onClear = () => {
     this.setState({
-      id: "",
       name: "",
-      status: false,
+      status: false
     })
   }
 
   render() {
-    let id = '';
-    //console.log(this.props.itemEditing);
-    if (this.props.itemEditing && this.props.itemEditing.id !== null) {
-      id = this.props.itemEditing.id;
-    }
     if (!this.props.isDisplayForm) return null;
     return (
       <div className="panel panel-warning">
         <div className="panel-heading">
           <h3 className="panel-title">
-            {id !== '' ? 'Cập nhật Công Việc' : 'Thêm Công Việc'}
+            {!this.state.id ? 'Thêm Công Việc' : 'Cập Nhật Công Việc'}
             <span className="fa fa-times-circle text-right" onClick={this.onCloseForm}></span>
           </h3>
         </div>
@@ -66,14 +80,20 @@ class TaskForm extends Component {
           <form onSubmit={this.onSave} >
             <div className="form-group">
               <label>Tên :</label>
-              <input type="text" name='name'
-                defaultValue={id !== '' ? this.props.itemEditing.name : ''}
-                onChange={this.onChange}
-                className="form-control" />
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={this.state.name}
+                onChange={this.onHandleChange}
+              />
             </div>
             <label>Trạng Thái :</label>
-            <select className="form-control" required="required"
-              name="status" defaultValue={id !== '' ? this.props.itemEditing.status : true}
+            <select
+              className="form-control"
+              value={this.state.status}
+              onChange={this.onHandleChange}
+              name="status"
             >
               <option value={true}>Kích Hoạt</option>
               <option value={false}>Ẩn</option>
@@ -81,7 +101,7 @@ class TaskForm extends Component {
             <br />
             <div className="text-center">
               <button type="submit" className="btn btn-warning"  >Thêm</button>&nbsp;
-                    <button type="submit" className="btn btn-danger" onClick={this.onClear}>Hủy Bỏ</button>
+                    <button type="button" className="btn btn-danger" onClick={this.onClear}>Hủy Bỏ</button>
             </div>
           </form>
         </div>

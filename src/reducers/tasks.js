@@ -11,22 +11,21 @@ let myReducer = (state = initialState, action) => {
       return state;
 
     case types.SAVE_TASK:
-      let newTask = {
+
+      var task = {
         id: action.task.id,
         name: action.task.name,
-        status: action.task.status
-      }
-      //console.log(action);
-      if (newTask.id) {
-        index = findIndex(state, newTask.id);
-        if (index === -1) {
-          state[index] = newTask;
-        }
+        status: action.task.status === false ? false : true
+      };
+
+      if (!task.id) {
+        task.id = randomKey();
+        state.push(task);
       } else {
-        newTask.id = randomKey() + '-' + randomKey();
-        state.push(newTask);
+        index = findIndex(state, task.id);
+        state[index] = task;
       }
-      localStorage.setItem('staks', JSON.stringify(state));
+      localStorage.setItem('tasks', JSON.stringify(state));
       return [...state];
 
     case types.UPDATE_STATUS:

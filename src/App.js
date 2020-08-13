@@ -10,8 +10,6 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      staskEditing: [],
-      keywork: '',
       filter: {
         filterName: '',
         filterStatus: -1
@@ -22,86 +20,21 @@ class App extends Component {
   }
 
   onToggleForm = () => {
-    this.props.onToggleForm();
+    let { itemEditing } = this.props;
+    if (itemEditing && itemEditing.id !== '') {
+      this.props.onOpenForm();
+    } else {
+      this.props.onToggleForm();
+    }
     this.props.onClearTask({
       id: '',
       name: '',
-      status: true
-    })
-  }
-
-  findIndex = (id) => {
-    let { tasks } = this.state;
-    let result = -1;
-    tasks.forEach((task, index) => {
-      if (task.id === id) { result = index; }
-    });
-    return result;
-  }
-
-  onFilter = (filterName, filterStatus) => {
-    this.setState({
-      fiter: {
-        filterName: filterName.toLowerCase(),
-        filterStatus: filterStatus
-      }
-    })
-  }
-
-  onSearch = (keywork) => {
-    this.setState({
-      keywork: keywork
-    })
-  }
-
-  onSort = (sortby, sortvalue) => {
-    this.setState({
-      sortby: sortby,
-      sortvalue: sortvalue
+      status: false
     })
   }
 
   render() {
-
-    //let { isDisplayForm, keywork, fiter, sortby, sortvalue } = this.state;
     let { isDisplayForm } = this.props;
-    // if (keywork) {
-    //   tasks = tasks.filter((task) => {
-    //     return task.name.toLowerCase().indexOf(keywork) !== -1
-    //   })
-    // }
-
-    // if (fiter) {
-    //   if (fiter.filterName) {
-    //     tasks = tasks.filter((task) => {
-    //       return task.name.toLowerCase().indexOf(fiter.filterName) !== -1
-    //     })
-    //   }
-
-    //   tasks = tasks.filter((task) => {
-    //     if (fiter.filterStatus === "-1") {
-    //       return task;
-    //     } else {
-    //       return task.status === (fiter.filterStatus === "1" ? true : false)
-    //     }
-    //   })
-    // }
-
-    // if (sortby === 'name') {
-    //   tasks = tasks.sort((a, b) => {
-    //     if (a.name > b.name) return parseInt(sortvalue);
-    //     else if (a.name < b.name) return -parseInt(sortvalue);
-    //     else return 0;
-    //   });
-    // }
-
-    // if (sortby === 'status') {
-    //   tasks = tasks.sort((a, b) => {
-    //     if (a.status > b.status) return parseInt(sortvalue);
-    //     else return -parseInt(sortvalue);
-    //   });
-    // }
-
     return (
       <div className="container">
         <div className="text-center">
@@ -117,9 +50,8 @@ class App extends Component {
               onClick={this.onToggleForm}>
               <span className="fa fa-plus mr-5"></span>Thêm Công Việc
             </button> &nbsp;
-            <Control onSearch={this.onSearch} onSort={this.onSort} />
-            <TaskList onFilter={this.onFilter}
-            />
+            <Control />
+            <TaskList />
           </div>
         </div>
       </div>
@@ -129,7 +61,8 @@ class App extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    isDisplayForm: state.isDisplayForm
+    isDisplayForm: state.isDisplayForm,
+    itemEditing: state.itemEditing
   }
 }
 const mapDispatchToProps = (dispatch, props) => {
@@ -139,7 +72,10 @@ const mapDispatchToProps = (dispatch, props) => {
     },
     onClearTask: (task) => {
       dispatch(actions.editTask(task));
-    }
+    },
+    onOpenForm: () => {
+      dispatch(actions.openForm())
+    },
   }
 }
 
